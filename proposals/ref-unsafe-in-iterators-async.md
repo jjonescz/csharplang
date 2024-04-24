@@ -58,14 +58,19 @@ However, spec clarifications which match the existing Roslyn implementation shou
 > always defines a safe context, even when its declaration is nested in an unsafe context
 > unless the iterator declaration itself is marked with the `unsafe` modifier ([§23.2][unsafe-contexts]).**
 
+Note that if a method is `partial`, both or neither of its declarations need to have the `unsafe` modifier,
+hence there is no ambiguity in the spec which iterator declaration with `unsafe` modifier is meant.
+
 For example:
 
 ```cs
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+class A : System.Attribute { }
 unsafe class C1
 { // unsafe context
+    [/* unsafe context */ A]
     IEnumerable<int> M1(
         /* unsafe context */)
     { // safe context (this is the iterator block implementing the iterator)
@@ -80,6 +85,13 @@ unsafe class C1
             }
         }
     }
+    [/* unsafe context */ A]
+    unsafe IEnumerable<int> M3(
+        /* unsafe context */)
+    { // unsafe context
+        yield return 1; // error: `yield return` in unsafe context
+    }
+    [/* unsafe context */ A]
     unsafe IEnumerable<int> this[
         /* unsafe context */ int x]
     { // unsafe context (the iterator declaration is unsafe)
@@ -89,6 +101,7 @@ unsafe class C1
         }
         set { /* unsafe context */ }
     }
+    [/* unsafe context */ A]
     IEnumerable<int> this[
         /* unsafe context */ string x]
     { // unsafe context
@@ -98,14 +111,21 @@ unsafe class C1
         }
         set { /* unsafe context */ }
     }
-    IEnumerable<int> M3()
+    IEnumerable<int> M4()
     {
         yield return 1;
-        var lam = async () =>
+        var lam1 = async () =>
         { // safe context
           // note: in Roslyn, this is an unsafe context in LangVersion 12 and lower
             await Task.Yield();
         };
+        unsafe
+        {
+            var lam2 = () =>
+            { // unsafe context, lambda cannot be an iterator
+                yield return 1; // error: yield cannot be used in lambda
+            };
+        }
         async void local()
         { // safe context
           // note: in Roslyn, this is an unsafe context in LangVersion 12 and lower
@@ -116,11 +136,13 @@ unsafe class C1
 }
 class C2
 { // safe context
+    [/* unsafe context */ A]
     unsafe IEnumerable<int> M(
         /* unsafe context */)
     { // unsafe context (the iterator declaration is unsafe)
         yield return 1; // error: `yield return` in unsafe context
     }
+    [/* unsafe context */ A]
     unsafe IEnumerable<int> this[
         /* unsafe context */]
     { // unsafe context (the iterator declaration is unsafe)
