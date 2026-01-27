@@ -239,6 +239,22 @@ For compat purposes, and to reduce the number of false negatives that occur when
 a member is considered `unsafe` if it contains a pointer or function pointer type somewhere among its parameter types or return type (can be nested in a non-pointer type, e.g., `int*[]`).
 Note that this doesn't apply to pointers in constraint types (e.g., `where T : I<int*[]>`) as those wouldn't need unsafe context at the call sites previously either.
 
+This includes substituted generic parameters but it's not perfect; consider:
+
+```cs
+// library using legacy rules
+public class C<T>
+{
+    public void M(T t) { }
+}
+
+// consumer using updated rules
+var c = new C<int*[]>();
+c.M(null); // unsafe error - pointer in signature of `C<int*[]>.M`.
+F(c); // no unsafe error even though `c.M` is called under the hood
+void F<T>(C<T> c) => c.M(default);
+```
+
 ## Open questions
 
 ### Local functions/lambda safe contexts
