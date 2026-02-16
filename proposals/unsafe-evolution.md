@@ -187,10 +187,6 @@ class C
 }
 ```
 
-Since pointer types are now safe, an `unsafe` modifier on declarations without bodies does not have a meaning anymore. Hence `unsafe` on the following declarations will produce a warning:
-- `using static`,
-- `using` alias.
-
 `RequiresUnsafe` on a member is _not_ applied to any nested anonymous or local functions inside the member. To mark an anonymous or local function as *requires-unsafe*, it must manually be marked as `RequiresUnsafe`. The same goes for
 anonymous and local functions declared inside of an `unsafe` block.
 
@@ -358,9 +354,9 @@ class A : Attribute
 [A] unsafe class C; // if unsafe still introduces an unsafe context, this makes the error go away
 ```
 
-### More meaningless `unsafe` warnings
+### Meaningless `unsafe` warnings
 
-Should more declarations produce the meaningless `unsafe` warning?
+Should some declarations produce the meaningless `unsafe` warning?
 For example, fields without initializers (assuming we don't support [*requires-unsafe* fields](#requires-unsafe-fields)), methods with empty bodies (or `extern`), etc.
 We already have an IDE analyzer for unnecessary `unsafe` though.
 
