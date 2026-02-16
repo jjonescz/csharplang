@@ -75,7 +75,7 @@ The following expressions require an `unsafe` context when used:
 
 In addition to these expressions, expressions and statements can also conditionally require an `unsafe` context if they depend on any symbol that is marked as `unsafe`. For example, calling a method
 that is *requires-unsafe* will cause the _invocation_expression_ to require an `unsafe` context. Statements with invocations embedded (such as `using`s, `foreach`, and similar) can also require an
-`unsafe` context when they use a *requires-unsafe* member.
+`unsafe` context when they use a *requires-unsafe* member. The `new()` constraint can be satisfied by a type with *requires-unsafe* parameterless constructor only in an `unsafe` context.
 
 When we say "requires an unsafe context" or similar in this document, it means emitting an error that the construct requires an `unsafe` context to be used.
 
