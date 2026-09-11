@@ -60,6 +60,43 @@ Ignored directives must occur before the first token ([§6.4][tokens]) in the co
 This improves readability (all package references and other configuration is in one place), tooling performance (no need to scan long files in full).
 Ignored directives must also occur before any `#if` directives because the tooling might not know the full set of conditional compilation symbols while parsing ignored directives.
 
+```cs
+Console.WriteLine();
+// compiler error - #: directive after the first token
+#:directive
+```
+
+```cs
+#if true
+// compiler error - #: directive after #if
+#:directive
+#endif
+```
+
+However, ignored directives in disabled regions don't produce any compilation errors.
+This makes it possible to wrap a valid code in `#if` regions, as demonstrated by the following example.
+
+```cs
+// no compiler error - not parsed as a directive, but as a raw string
+string code1 = """
+    #:directive
+    """;
+```
+
+```cs
+// no compiler error regardless of DEBUG (even though in a disabled region, directives are normally lexed)
+#if DEBUG
+string code2 = """
+    #:directive
+    """;
+#endif
+```
+
+Note that the tooling should use a spec-compliant lexer in order to be able to process only valid directives
+and ignore directives after the first token, in raw string literals, multi-line comments, etc.
+It should not rely solely on ignoring directives with compiler diagnostics though
+because directives inside disabled regions do not produce any diagnostics even though they might be logically present in the set of lexed tokens.
+
 Furthermore, the compiler should report a warning if the `#!` directive is not placed at the first line and the first character in the file
 (not even a BOM marker can be in front of it), because otherwise shells won't recognize it.
 
