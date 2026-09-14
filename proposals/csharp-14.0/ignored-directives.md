@@ -93,7 +93,7 @@ string code2 = """
 ```
 
 Note that the tooling should use a spec-compliant lexer in order to be able to process only valid directives
-and ignore directives after the first token, in raw string literals, multi-line comments, etc.
+and ignore directives after the first token, in multi-line string literals, multi-line comments, etc.
 It should not rely solely on ignoring directives with compiler diagnostics though
 because directives inside disabled regions do not produce any diagnostics even though they might be logically present in the set of lexed tokens.
 
